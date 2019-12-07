@@ -31,12 +31,12 @@ public class LlvmGenerator {
 
         // Childrens of the ParseTree
         for (int i = 0; i < this.PTree.getChildren().size() - 1; i++) {
-            System.out.print(this.PTree.getChildren().get(i).getLabel().getVariable());
-            if (this.PTree.getChildren().get(i).getLabel().getValue() != null
-                    && this.PTree.getChildren().get(i).getLabel().getValue().equals("Code")) {
+            if (this.PTree.getChildren().get(i).getLabel().getVariable() != null) {
+                if (this.PTree.getChildren().get(i).getLabel().getVariable().toString().equals("Code")) {
                     // Variables Tree
                     Code(this.PTree.getChildren().get(i));
-                 }
+                }
+            }
 
         }
 
@@ -46,12 +46,10 @@ public class LlvmGenerator {
 
     private void Code(ParseTree code) {
         // Instructions Tree
-        /*Instructions(code.getChildren().get(0));
+        Instructions(code.getChildren().get(0));
         if (code.getChildren().size() == 3) {
             Code(code.getChildren().get(2));
-        }*/
-        System.out.print("this is it ");
-
+        }
     }
 
 
