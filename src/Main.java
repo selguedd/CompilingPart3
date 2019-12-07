@@ -43,7 +43,9 @@ public class Main{
                 String content = parseTree.toLaTeX();
                 try {
                     Files.write(Paths.get(args[i+1]), content.getBytes());
-
+                    LlvmGenerator llvm = new LlvmGenerator(parseTree);
+                    llvm.Generate();
+                    System.out.println(llvm.toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

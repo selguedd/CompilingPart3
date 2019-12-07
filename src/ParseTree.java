@@ -38,6 +38,15 @@ public class ParseTree {
         this.children = chdn;
     }
 
+    public List<ParseTree> getChildren() {
+        return this.children;
+    }
+
+    public Symbol getLabel() {
+        return this.label;
+    }
+
+
     /**
      * Writes the tree as LaTeX code
      */
