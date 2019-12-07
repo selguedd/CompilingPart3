@@ -45,12 +45,23 @@ public class LlvmGenerator {
 
 
     private void Code(ParseTree code) {
-        // Instructions Tree
-        Instructions(code.getChildren().get(0));
-        if (code.getChildren().size() == 3) {
-            Code(code.getChildren().get(2));
+        System.out.println("n"+code.getLabel()+"n");
+        if (code.getChildren().get(0).getLabel().getVariable().toString().equals("InstList")) {
+            // code appel Instructions, et Inst, Inst peu soit ne rien appeler, soit appeler Instruction et se re appeler
+            Instructions(code.getChildren().get(0));
+            Inst(code.getChildren().get(1));
         }
     }
+
+
+    private void Instructions(ParseTree instructions) {
+        System.out.println("Je suis la");
+    }
+
+    private void Inst(ParseTree inst) {
+        System.out.println("Je suis ici");
+    }
+
 
 
     private void LlvmGeneratecodeError(String var) {
