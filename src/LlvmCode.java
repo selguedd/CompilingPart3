@@ -4,8 +4,6 @@ import java.util.*;
  *
  * LLVM code writer
  *
- * @author AMSSAFI brahim ,AZZOUZI Samia
- *
  */
 
 public class LlvmCode {

@@ -12,7 +12,7 @@ import java.util.List;
  * This class implements a recursive descent LL(1) parser, that will parse through the File given in argument
  * and will detect the set of rules that were used.
  * So we built a method for each and every rule of the Grammar, and in every of these method
- * we implement the built of the parsetree with
+ * we implement the built of the parsetree with 
  * "ParseTree parseTree = new ParseTree(new Symbol(NotTerminal.Program), Arrays.asList ..."
  * This class also contains the methods that will print out the rules, as well as the more verbose specification
  * at the output of our program
