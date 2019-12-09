@@ -45,21 +45,64 @@ public class LlvmGenerator {
 
 
     private void Code(ParseTree code) {
-        System.out.println("n"+code.getLabel()+"n");
         if (code.getChildren().get(0).getLabel().getVariable().toString().equals("InstList")) {
             // code appel Instructions, et Inst, Inst peu soit ne rien appeler, soit appeler Instruction et se re appeler
-            Instructions(code.getChildren().get(0));
-            Inst(code.getChildren().get(1));
+            InstList(code.getChildren().get(0));
         }
     }
 
 
+    private void InstList(ParseTree instlist) {
+        if (instlist.getChildren().get(0).getLabel().getVariable().toString().equals("Instruction")){
+
+            Instructions(instlist.getChildren().get(0));
+            Inst(instlist.getChildren().get(1));
+
+        }
+    }
+
     private void Instructions(ParseTree instructions) {
-        System.out.println("Je suis la");
+
+            if (!inst.getLabel().getValue().equals("EPSILON")) {
+                switch (inst.getChildren().get(0).getLabel().getType()) {
+                // Assign
+                case VARNAME:
+                    String var = inst.getChildren().get(0).getLabel().getValue().toString();
+                    if (!this.llvmCode.Isvar(var)) {
+                        LlvmGeneratecodeError("Varriable " + var + " Not declared !");
+                    }
+                    String exp = ExpArth(inst.getChildren().get(2), inst.getChildren().get(3), inst.getChildren().get(4));
+                    this.llvmCode.StoreValue("%" + var, exp);
+                    break;
+
+                case IF:
+                    If(inst);
+                    break;
+                case WHILE:
+                    While(inst);
+                    break;
+                case FOR:
+                    // inst = FOR Node
+                    For(inst);
+                    break;
+                case PRINT:
+                    // inst.getChildren().get(2) = Explist Node
+                    ExpList(inst.getChildren().get(2));
+                    break;
+                case READ:
+                    // inst.getChildren().get(2) = VarList Node
+                    ReadVarList(inst.getChildren().get(2));
+                    break;
+                }
+
+            }
+
     }
 
     private void Inst(ParseTree inst) {
-        System.out.println("Je suis ici");
+        if (!inst.getChildren().get(0).getLabel().getType().toString().equals("EPSILON")){
+            InstList(inst.getChildren().get(1));
+        }
     }
 
 
