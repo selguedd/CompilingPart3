@@ -109,12 +109,24 @@ public class LlvmGenerator {
         return x+' '+y;
     }
 
-    private ProdEx(ParseTree prodex){
+    private String ProdEx(ParseTree prodex){
         String x = ProdAtom(prodex.getChildren().get(0));
         String y = ProdTail(prodex.getChildren().get(1));
         return x+' '+y;
     }
 
+    private String ExprTail(ParseTree exprtail){
+        String x = '';
+        String y = '';
+        String z = '';
+        if (!exprtail.getChildren().get(0).getLabel().getType().toString().equals("EPSILON")){
+            x = AddSous(exprtail.getChildren().get(0));
+            y = ProdEx(exprtail.getChildren().get(1));
+            z = ExprTail(exprtail.getChildren().get(2));
+        }
+
+        return x+' '+y+' '+z;
+    }
 
 
 
@@ -142,6 +154,26 @@ public class LlvmGenerator {
             return var;
         }
         return var;
+    }
+
+
+    private String ProdTail(ParseTree prodtail){
+        String x = '';
+        String y = '';
+        String z = '';
+        if (!prodtail.getChildren().get(0).getLabel().getType().toString().equals("EPSILON")){
+            x = ProdDiv(prodtail.getChildren().get(0));
+            y = ProdAtom(prodtail.getChildren().get(1));
+            z = ProdTail(prodtail.getChildren().get(2));
+        }
+
+        return x+' '+y+' '+z;
+    }
+
+
+
+    private String AddSous(ParseTree addsous){
+
     }
 
 
