@@ -103,6 +103,48 @@ public class LlvmGenerator {
         }
     }
 
+    private String ExpArth(ParseTree exparith){
+        String x = ProdEx(exparith.getChildren().get(0));
+        String y = ExprTail(exparith.getChildren().get(1));
+        return x+' '+y;
+    }
+
+    private ProdEx(ParseTree prodex){
+        String x = ProdAtom(prodex.getChildren().get(0));
+        String y = ProdTail(prodex.getChildren().get(1));
+        return x+' '+y;
+    }
+
+
+
+
+    private String ProdAtom(ParseTree beta) {
+        String var = "";
+        switch (beta.getChildren().get(0).getLabel().getVariable()) {
+        case VARNAME:
+            String vartoload = beta.getChildren().get(0).getLabel().getValue().toString();
+            var = this.llvmCode.LoadVar(vartoload);
+            if (var.equals("Not Found")) {
+                LlvmGeneratecodeError("Varriable " + var + " Not initialised !");
+            }
+            return var;
+        case NUMBER:
+            var = beta.getChildren().get(0).getLabel().getValue().toString();
+
+            return this.llvmCode.Uvars(var);
+
+        case MINUS:
+            var = ProdAtom(beta.getChildren().get(1));
+
+            return this.llvmCode.Experssion("0", "sub nsw", var);
+        case LPAREN:
+            var = ExpArth(beta.getChildren().get(1));
+            return var;
+        }
+        return var;
+    }
+
+
 
 
 
@@ -111,14 +153,19 @@ public class LlvmGenerator {
         String var = forTree.getChildren().get(1).getLabel().getValue().toString();
         if (!this.llvmCode.Isvar(var)) {
             this.llvmCode.DeclareVars(var);
-        } // arrivé ici lundi soir
-        /*String n = ExpArth(forTree.getChildren().get(7), forTree.getChildren().get(8), forTree.getChildren().get(9));
-        String i = ExpArth(forTree.getChildren().get(3), forTree.getChildren().get(4), forTree.getChildren().get(5));
+        }
+
+        String p = ExpArth(forTree.getChildren().get(5));
+        String i = ExpArth(forTree.getChildren().get(3));
+        string n = ExpArth(forTree.getChildren().get(7));
+
+
+
         this.llvmCode.StoreValue("%" + var, i);
         int forid = this.llvmCode.Forid();
-
+         // faudera modifier paske c est une autre for loop dans notre lannguage
         this.llvmCode.ForLop(var, n, forid);
-        Code(forTree.getChildren().get(12));
+        Code(forTree.getChildren().get(9));
         this.llvmCode.EndFor(var, forid);
         this.llvmCode.AfterFor(forid);*/
     }
