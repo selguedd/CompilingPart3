@@ -66,28 +66,25 @@ public class LlvmGenerator {
                 switch (inst.getChildren().get(0).getLabel().getVariable()) {
                 // Assign
                 case Assign:
-                    //Assign(inst);
                     System.out.println("Assign");
+                    //Assign(inst);
                     break;
                 case If:
-                    //If(inst);
-                    System.out.println("If");
+                    If(inst.getChildren().get(0));
                     break;
                 case While:
                     //While(inst);
-                    System.out.println("While");
                     break;
                 case For:
-                    // inst = FOR Node
+                    //inst = FOR Node
                     For(inst.getChildren().get(0));
                     break;
                 case Print:
-                    // inst.getChildren().get(2) = Explist Node
+                    //inst.getChildren().get(2) = Explist Node
                     //ExpList(inst.getChildren().get(2));
-                    System.out.println("Print");
                     break;
                 case Read:
-                    // inst.getChildren().get(2) = VarList Node
+                    //inst.getChildren().get(2) = VarList Node
                     //ReadVarList(inst.getChildren().get(2));
                     System.out.println("Read");
                     break;
@@ -189,8 +186,8 @@ public class LlvmGenerator {
 
 
  private String CondPrime(ParseTree condp) {
-
-        if (condp.getChildren().get(0).getChildren().get(0).getLabel().getValue().equals("NOT")) {
+        // getLabel().getVariable().toString().equals("InstList")
+        if (condp.getChildren().get(0).getChildren().get(0).getLabel().getVariable().toString().equals("NOT")) {
 
             String cnd = CondPrimeBeta(condp.getChildren().get(1), SimpleCond(condp.getChildren().get(0).getChildren().get(1)));
             return this.llvmCode.Bitw("xor", cnd, "true");
@@ -201,7 +198,8 @@ public class LlvmGenerator {
     }
 
     private String CondBeta(ParseTree condB, String condP) {
-        if (condB.getChildren().get(0).getLabel().getValue().equals("OR")) {
+
+        if (!condB.getChildren().get(0).getLabel().getType().toString().equals("EPSILON")) {
             String orvar = CondBeta(condB.getChildren().get(2), CondPrime(condB.getChildren().get(1)));
             return this.llvmCode.Bitw("or", orvar, condP);
 
@@ -210,7 +208,8 @@ public class LlvmGenerator {
     }
 
     private String CondPrimeBeta(ParseTree condpb, String condprimeVar) {
-        if (condpb.getChildren().get(0).getLabel().getValue().equals("AND")) {
+        //getLabel().getType().toString().equals("EPSILON")
+        if (!condpb.getChildren().get(0).getLabel().getType().toString().equals("EPSILON")) {
 
             String andvar = CondPrimeBeta(condpb.getChildren().get(2), CondPrime(condpb.getChildren().get(1)));
             return this.llvmCode.Bitw("and", andvar, condprimeVar);
@@ -219,12 +218,11 @@ public class LlvmGenerator {
         return condprimeVar;
     }
 
+
     private String SimpleCond(ParseTree SimpleCond) {
-        String expA = ExpArth(SimpleCond.getChildren().get(0), SimpleCond.getChildren().get(1),
-                SimpleCond.getChildren().get(2));
-        String expB = ExpArth(SimpleCond.getChildren().get(4), SimpleCond.getChildren().get(5),
-                SimpleCond.getChildren().get(6));
-        String comp = Comp(SimpleCond.getChildren().get(3));
+        String expA = ExpArth(SimpleCond.getChildren().get(0));
+        String expB = ExpArth(SimpleCond.getChildren().get(2));
+        String comp = Comp(SimpleCond.getChildren().get(1));
         return this.llvmCode.BooleanOp(comp, expA, expB);
     }
 
@@ -247,7 +245,7 @@ public class LlvmGenerator {
             return "ne";
         }
         return null;
-    }  // je suis la 
+    }
 
 
 
@@ -287,16 +285,36 @@ public class LlvmGenerator {
 
 
     private void If(ParseTree iftree) {
-
+        // <If> --> IF <Cond> THEN <Code> <IfTail>
         int ifid = this.llvmCode.Iflabel();
-        String ifcnd = CondBeta(iftree.getChildren().get(1).getChildren().get(1), CondPrime(iftree.getChildren().get(1).getChildren().get(0));
-        String labelcond = Ifst(iftree.getChildren().get(8));
+        String ifcnd = CondBeta(iftree.getChildren().get(1).getChildren().get(1), CondPrime(iftree.getChildren().get(1).getChildren().get(0)));
+        String labelcond = Ifst(iftree.getChildren().get(4));
 
         this.llvmCode.If(ifcnd, labelcond, ifid);
-        Code(iftree.getChildren().get(7));
-        ElseCode(iftree.getChildren().get(8), ifid);
+        Code(iftree.getChildren().get(3));
+        ElseCode(iftree.getChildren().get(4), ifid);
 
     }
+
+
+    private String Ifst(ParseTree IfstTree) {
+        if (IfstTree.getChildren().get(0).getLabel().getValue().equals("ELSE")) {
+            return "ELSE";
+        }
+        return "ENDIF";
+
+    }
+
+    private void ElseCode(ParseTree ElseCode, int ifid) {
+        if (ElseCode.getChildren().get(0).getLabel().getValue().equals("ELSE")) {
+            this.llvmCode.Ifstlabel("ELSE", ifid);
+            Code(ElseCode.getChildren().get(2));
+            this.llvmCode.Ifstlabel("ENDIF", ifid);
+        } else
+            this.llvmCode.Ifstlabel("ENDIF", ifid);
+
+    }
+
 
 
 
