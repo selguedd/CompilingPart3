@@ -103,36 +103,27 @@ public class LlvmGenerator {
         }
     }
 
-    private String ExpArth(ParseTree exparith){
-        String x = ProdEx(exparith.getChildren().get(0));
-        String y = ExprTail(exparith.getChildren().get(1));
-        return x+' '+y;
+
+
+
+
+
+
+
+
+ private String ExpArth(ParseTree exprarith) {
+
+
+       /*System.out.println("lol");
+       System.out.println(exprarith.getChildren().get(0).getChildren().get(0).getLabel());
+       return ("5");*/
+       return ExprTail(exprarith.getChildren().get(1), ProdTail(exprarith.getChildren().get(0).getChildren().get(1), ProdAtom(exprarith.getChildren().get(0).getChildren().get(0))));
+
     }
-
-    private String ProdEx(ParseTree prodex){
-        String x = ProdAtom(prodex.getChildren().get(0));
-        String y = ProdTail(prodex.getChildren().get(1));
-        return x+' '+y;
-    }
-
-    private String ExprTail(ParseTree exprtail){
-        String x = '';
-        String y = '';
-        String z = '';
-        if (!exprtail.getChildren().get(0).getLabel().getType().toString().equals("EPSILON")){
-            x = AddSous(exprtail.getChildren().get(0));
-            y = ProdEx(exprtail.getChildren().get(1));
-            z = ExprTail(exprtail.getChildren().get(2));
-        }
-
-        return x+' '+y+' '+z;
-    }
-
-
 
     private String ProdAtom(ParseTree beta) {
         String var = "";
-        switch (beta.getChildren().get(0).getLabel().getVariable()) {
+        switch (beta.getChildren().get(0).getLabel().getType()) {
         case VARNAME:
             String vartoload = beta.getChildren().get(0).getLabel().getValue().toString();
             var = this.llvmCode.LoadVar(vartoload);
@@ -149,32 +140,118 @@ public class LlvmGenerator {
             var = ProdAtom(beta.getChildren().get(1));
 
             return this.llvmCode.Experssion("0", "sub nsw", var);
-        case LPAREN:
+        case LEFT_PARENTHESIS:
             var = ExpArth(beta.getChildren().get(1));
             return var;
         }
         return var;
     }
 
+    private String ProdTail(ParseTree tmp, String valbet) {
+        String val = "";
+        if (tmp.getChildren().size() > 1) {
+            switch (tmp.getChildren().get(0).getChildren().get(0).getLabel().getType()) {
+            case TIMES:
+                val = this.llvmCode.Experssion(valbet, "mul", ProdAtom(tmp.getChildren().get(1)));
 
-    private String ProdTail(ParseTree prodtail){
-        String x = '';
-        String y = '';
-        String z = '';
-        if (!prodtail.getChildren().get(0).getLabel().getType().toString().equals("EPSILON")){
-            x = ProdDiv(prodtail.getChildren().get(0));
-            y = ProdAtom(prodtail.getChildren().get(1));
-            z = ProdTail(prodtail.getChildren().get(2));
+                return ProdTail(tmp.getChildren().get(2), val);
+
+            case DIVIDE:
+                val = this.llvmCode.Experssion(valbet, "sdiv", ProdAtom(tmp.getChildren().get(1)));
+
+                return ProdTail(tmp.getChildren().get(2), val);
+            }
+
+        }
+        return valbet;
+    }
+
+    private String ExprTail(ParseTree exp, String tmp) {
+
+        if (exp.getChildren().size() > 1) {
+            String val = "";
+            switch (exp.getChildren().get(0).getChildren().get(0).getLabel().getType()) {
+            case PLUS:
+                val = ExpArth(exp.getChildren().get(1));
+                return this.llvmCode.Experssion(tmp, "add", val);
+            case MINUS:
+                val = ExpArth(exp.getChildren().get(1));
+                return this.llvmCode.Experssion(tmp, "sub", val);
+            }
+        }
+        return tmp;
+    }
+
+
+
+
+
+
+
+ private String CondPrime(ParseTree condp) {
+
+        if (condp.getChildren().get(0).getChildren().get(0).getLabel().getValue().equals("NOT")) {
+
+            String cnd = CondPrimeBeta(condp.getChildren().get(1), SimpleCond(condp.getChildren().get(0).getChildren().get(1)));
+            return this.llvmCode.Bitw("xor", cnd, "true");
         }
 
-        return x+' '+y+' '+z;
-    }
-
-
-
-    private String AddSous(ParseTree addsous){
+        return CondPrimeBeta(condp.getChildren().get(1), SimpleCond(condp.getChildren().get(0)));
 
     }
+
+    private String CondBeta(ParseTree condB, String condP) {
+        if (condB.getChildren().get(0).getLabel().getValue().equals("OR")) {
+            String orvar = CondBeta(condB.getChildren().get(2), CondPrime(condB.getChildren().get(1)));
+            return this.llvmCode.Bitw("or", orvar, condP);
+
+        }
+        return condP;
+    }
+
+    private String CondPrimeBeta(ParseTree condpb, String condprimeVar) {
+        if (condpb.getChildren().get(0).getLabel().getValue().equals("AND")) {
+
+            String andvar = CondPrimeBeta(condpb.getChildren().get(2), CondPrime(condpb.getChildren().get(1)));
+            return this.llvmCode.Bitw("and", andvar, condprimeVar);
+
+        }
+        return condprimeVar;
+    }
+
+    private String SimpleCond(ParseTree SimpleCond) {
+        String expA = ExpArth(SimpleCond.getChildren().get(0), SimpleCond.getChildren().get(1),
+                SimpleCond.getChildren().get(2));
+        String expB = ExpArth(SimpleCond.getChildren().get(4), SimpleCond.getChildren().get(5),
+                SimpleCond.getChildren().get(6));
+        String comp = Comp(SimpleCond.getChildren().get(3));
+        return this.llvmCode.BooleanOp(comp, expA, expB);
+    }
+
+    private String Comp(ParseTree comp) {
+        switch (comp.getChildren().get(0).getLabel().getValue().toString()) {
+        case "EQUAL":
+            return "eq";
+        case "GREATER_EQUAL":
+            return "sge";
+        case "GREATER":
+            return "sgt";
+
+        case "SMALLER_EQUAL":
+            return "sle";
+
+        case "SMALLER":
+            return "slt";
+
+        case "DIFFERENT":
+            return "ne";
+        }
+        return null;
+    }  // je suis la 
+
+
+
+
 
 
 
@@ -189,7 +266,7 @@ public class LlvmGenerator {
 
         String p = ExpArth(forTree.getChildren().get(5));
         String i = ExpArth(forTree.getChildren().get(3));
-        string n = ExpArth(forTree.getChildren().get(7));
+        String n = ExpArth(forTree.getChildren().get(7));
 
 
 
@@ -199,8 +276,29 @@ public class LlvmGenerator {
         this.llvmCode.ForLop(var, n, forid);
         Code(forTree.getChildren().get(9));
         this.llvmCode.EndFor(var, forid);
-        this.llvmCode.AfterFor(forid);*/
+        this.llvmCode.AfterFor(forid);
     }
+
+
+
+
+
+
+
+
+    private void If(ParseTree iftree) {
+
+        int ifid = this.llvmCode.Iflabel();
+        String ifcnd = CondBeta(iftree.getChildren().get(1).getChildren().get(1), CondPrime(iftree.getChildren().get(1).getChildren().get(0));
+        String labelcond = Ifst(iftree.getChildren().get(8));
+
+        this.llvmCode.If(ifcnd, labelcond, ifid);
+        Code(iftree.getChildren().get(7));
+        ElseCode(iftree.getChildren().get(8), ifid);
+
+    }
+
+
 
     private void LlvmGeneratecodeError(String var) {
         System.out.println(var);
