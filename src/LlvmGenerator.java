@@ -72,7 +72,7 @@ public class LlvmGenerator {
                     If(inst.getChildren().get(0));
                     break;
                 case While:
-                    //While(inst);
+                    While(inst.getChildren().get(0));
                     break;
                 case For:
                     //inst = FOR Node
@@ -328,10 +328,10 @@ public class LlvmGenerator {
     private void While(ParseTree whiletree) {
 
         int whileid = this.llvmCode.whilelabel();
-        String whilecnd = CondBeta(whiletree.getChildren().get(3), CondPrime(whiletree.getChildren().get(2)));
+        String whilecnd = CondBeta(whiletree.getChildren().get(1).getChildren().get(1), CondPrime(whiletree.getChildren().get(1).getChildren().get(0)));
 
         this.llvmCode.While(whilecnd, whileid);
-        Code(whiletree.getChildren().get(7));
+        Code(whiletree.getChildren().get(3));
         this.llvmCode.Endwhile(whilecnd, whileid);
         this.llvmCode.Afterwhile(whileid);
 
