@@ -81,15 +81,22 @@ public class LlvmGenerator {
                 case Print:
                     //inst.getChildren().get(2) = Explist Node
                     //ExpList(inst.getChildren().get(2));
-                    System.out.println("Print");
+                    printVar(inst.getChildren().get(2));
                     break;
                 case Read:
-                    //inst.getChildren().get(2) = VarList Node
-                    //ReadVarList(inst.getChildren().get(2));
-                    System.out.println("Read");
+                    ReadVarList(inst.getChildren().get(2));
                     break;
 
     }}
+    private void printVar(ParseTree explist) {
+        String var = explist.getChildren().get(2).getLabel().getValue();
+        if (!this.llvmCode.Isvar(var)) {
+            LlvmGeneratecodeError(var + " not declared !");
+
+        }
+        this.llvmCode.PrintVar(var);
+
+    }
 
 
     private void Assign(ParseTree assign){
@@ -336,6 +343,19 @@ public class LlvmGenerator {
         this.llvmCode.Afterwhile(whileid);
 
     }
+    private void ReadVarList(ParseTree varlist) {
+
+        String var = varlist.getChildren().get(0).getLabel().getValue();
+        if (!this.llvmCode.Isvar(var)) {
+            LlvmGeneratecodeError(var + " not declared !");
+
+        }
+        this.llvmCode.ReadInt(var);
+
+    }
+
+
+
 
 
 

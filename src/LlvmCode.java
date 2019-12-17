@@ -104,8 +104,8 @@ public class LlvmCode {
     }
 
     // Print code
-    public void PrintInt(String print) {
-        this.llvmcode.append("\tcall void @printInt(i32 " + print + ")\n");
+    public void PrintVar(String print) {
+        this.llvmcode.append("\tcall void @println(i32 " + print + ")\n");
         this.print = true;
     }
 
@@ -223,12 +223,23 @@ public class LlvmCode {
 
     // Function Read
     private String declareRead() {
+
         return " declare i32 @getchar() \n ; Defining a function wich read integer  \ndefine i32 @readInt() {  \n  entry:  \n  \t	%res = alloca i32  \n  \t	%digit = alloca i32  \n  \t	%mult = alloca i32  \n  \t	store i32 0, i32* %res  \n  \t	store i32 1, i32* %mult  \n  \t	br label %firstread  \n  firstread:  \n  \t	%a = call i32 @getchar()  \n   \t	%b = icmp eq i32 %a, 45  \n  \t	br i1 %b, label %firstminus, label %firstdigit  \n  firstminus:  \n  \t	store i32 -1, i32* %mult  \n  \t	br label %read  \n  firstdigit:  \n  \t	%c = sub i32 %a, 48  \n   \t	store i32 %c, i32* %digit  \n  \t	%d = icmp ne i32 %a, 10  \n  \t	br i1 %d, label %save, label %exit  \n  read:  \n  \t	%0 = call i32 @getchar()  \n  \t	%1 = sub i32 %0, 48  \n  \t	store i32 %1, i32* %digit  \n  \t	%2 = icmp ne i32 %0, 10  \n  \t	br i1 %2, label %save, label %exit  \n  save:  \n   \t	%3 = load i32,i32* %res  \n  \t	%4 = load i32,i32* %digit  \n  \t	%5 = mul i32 %3, 10  \n  \t	%6 = add i32 %5, %4  \n  \t	store i32 %6, i32* %res  \n  \t	br label %read  \n  getminus:  \n  \t	store i32 -1, i32* %mult  \n  \t	br label %read  \n exit:  \n  \t	%7 = load i32,i32* %res  \n \t	%8 = load i32,i32* %mult  \n \t	%9 = mul i32 %7, %8  \n  \t	ret i32 %9  \n }   \n";
     }
 
     // Function Read
     public String declarePrint() {
-        return "declare i32 @putchar(i32)  \n   ; Defining a function wich print integer  \n     define void @printInt(i32 %a) {  \n       entry:  \n\t%size = alloca i32  \n\t %int = alloca i32  \n\t store i32 10, i32* %size  \n\t store i32 %a, i32* %int  \n\t         br label %negativetest   \n     negativetest:  \n     \t         %0 = icmp slt i32 %a, 0  \n     \t  br i1 %0, label %minus, label %sizecmp   \n     minus:  \n     \t  call i32 @putchar(i32 45)  \n     \t  %2 = load i32,i32* %int   \n     \t  %3 = mul i32 %2, -1  \n     \t  store i32 %3, i32* %int   \n     \t  br label %sizecmp  \n     computesize:  \n     \t  %4 = load i32,i32* %size  \n     \t  %5 = mul i32 %4, 10  \n     \t  store i32 %5, i32* %size  \n     \t  br label %sizecmp  \n     sizecmp:  \n     \t  %6 = load i32,i32* %size  \n     \t  %i = load i32,i32* %int  \n     \t  %7 = icmp ugt i32 %6, %i  \n     \t  br i1 %7, label %printloop, label %computesize  \n     printloop:  \n     \t  %j = load i32,i32* %int  \n     \t  %8 = load i32,i32* %size  \n     \t  %9 = udiv i32 %8, 10  \n     \t  store i32 %9, i32* %size  \n     \t  %10 = udiv i32 %j, %9  \n     \t  %11 = urem i32 %10, 10  \n     \t  %12 = add i32 %11, 48  \n     \t  call i32 @putchar(i32 %12)  \n     \t  %14 = icmp ugt i32 %9, 1  \n     \t  br i1 %14, label %printloop, label %exit  \n      exit:  \n       \t  ret void  \n       } \n";
+        String str="define void @println(i32 %x) #0 { \n"+
+        "%1 = alloca i32, align 4 \n "+
+        "store i32 %x, i32* %1, align 4 \n "+
+        "%2 = load i32, i32* %1, align 4 \n "+
+        "%3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.strP, i32 0, i32 0), i32 %2) \n "+
+        "ret void \n "+
+        "} \n "+
+        " \n "+
+        "declare i32 @printf(i8*, ...) #1 \n "+
+        " \n ";
+        return str;
     }
 
     // llvm code tostring
