@@ -38,9 +38,7 @@ public class LlvmGenerator {
                 }
             }
 
-        }
-
-    }
+        } }
 
 
 
@@ -91,24 +89,34 @@ public class LlvmGenerator {
 
 
     private void Print(ParseTree printTree) {
+
+
         String var = printTree.getChildren().get(2).getLabel().getValue();
         if (!this.llvmCode.Isvar(var)) {
-            System.out.println("we are here");
             LlvmGeneratecodeError(var + " not declared !");
-            System.out.println("we are here");
         }
         this.llvmCode.PrintVar(var);
 
     }
 
+    private void Read(ParseTree varlist) {
 
-    private void Assign(ParseTree assign){
-        String var = "";
-        String vartoload = assign.getChildren().get(0).getLabel().getValue().toString();
-        var = this.llvmCode.LoadVar(vartoload);
-        if (var.equals("Not Found")) {
-        LlvmGeneratecodeError("Varriable " + var + " Not initialised !");}
+        String var = varlist.getChildren().get(2).getLabel().getValue().toString();
+        if (!this.llvmCode.Isvar(var)) {
+            this.llvmCode.DeclareVars(var);
+        }
+        this.llvmCode.ReadInt(var);
 
+    }
+
+
+    private void Assign(ParseTree assignTree){
+
+        String var = assignTree.getChildren().get(0).getLabel().getValue().toString();
+        // if this var is not alredy declared ,we declare it
+        this.llvmCode.DeclareVars(var);
+        String exp = ExpArth(assignTree.getChildren().get(2));
+        this.llvmCode.StoreValue("%" + var, exp);
     }
 
 
@@ -129,10 +137,6 @@ public class LlvmGenerator {
 
  private String ExpArth(ParseTree exprarith) {
 
-
-       /*System.out.println("lol");
-       System.out.println(exprarith.getChildren().get(0).getChildren().get(0).getLabel());
-       return ("5");*/
        return ExprTail(exprarith.getChildren().get(1), ProdTail(exprarith.getChildren().get(0).getChildren().get(1), ProdAtom(exprarith.getChildren().get(0).getChildren().get(0))));
 
     }
@@ -188,10 +192,12 @@ public class LlvmGenerator {
             String val = "";
             switch (exp.getChildren().get(0).getChildren().get(0).getLabel().getType()) {
             case PLUS:
-                val = ExpArth(exp.getChildren().get(1));
+                //val = ExpArth(exp.getChildren().get(1));
+                val = ExprTail(exp.getChildren().get(2), ProdTail(exp.getChildren().get(1).getChildren().get(1), ProdAtom(exp.getChildren().get(1).getChildren().get(0))));
                 return this.llvmCode.Experssion(tmp, "add", val);
             case MINUS:
-                val = ExpArth(exp.getChildren().get(1));
+                //val = ExpArth(exp.getChildren().get(1));
+                val = ExprTail(exp.getChildren().get(2), ProdTail(exp.getChildren().get(1).getChildren().get(1), ProdAtom(exp.getChildren().get(1).getChildren().get(0))));
                 return this.llvmCode.Experssion(tmp, "sub", val);
             }
         }
@@ -265,12 +271,6 @@ public class LlvmGenerator {
         }
         return null;
     }
-
-
-
-
-
-
 
 
 
@@ -348,16 +348,7 @@ public class LlvmGenerator {
     }
 
 
-    private void Read(ParseTree varlist) {
 
-        String var = varlist.getChildren().get(2).getLabel().getValue();
-        if (!this.llvmCode.Isvar(var)) {
-            LlvmGeneratecodeError(var + " not declared !");
-
-        }
-        this.llvmCode.ReadInt(var);
-
-    }
 
 
 
