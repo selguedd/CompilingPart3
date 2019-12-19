@@ -1,5 +1,4 @@
-
-CO Euclid's algorithm CO 
+CO Euclid's algorithm CO
 begin
   read(a);
   read(b);
