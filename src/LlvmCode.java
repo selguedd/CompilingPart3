@@ -23,6 +23,8 @@ public class LlvmCode {
     private boolean print;
     // if print used in code
     private boolean read;
+    // counter
+    private int count;
 
     public LlvmCode() {
         this.llvmcode = new StringBuffer();
@@ -33,8 +35,19 @@ public class LlvmCode {
         this.whileid = 1;
         this.print = false;
         this.read = false;
-
+        this.count=0;
         this.CreatMain();
+    }
+    public void assign(String variable, String value){
+        if(varriables.contains(variable)){
+            this.llvmcode.append("\tstore i32 " + value + ",i32* %" + variable + "\n");
+        }
+        else{
+            this.llvmcode.append("\t%" + variable + " = alloca i32\n");
+            this.llvmcode.append("\tstore i32 " + value + ",i32* %" + variable + "\n");
+            varriables.add(variable);
+        }
+
     }
 
     public void CreatMain() {
@@ -105,17 +118,29 @@ public class LlvmCode {
 
     // Print code
     public void PrintVar(String print) {
-        this.llvmcode.append("\tcall void @println(i32 " + print + ")\n");
+        if(varriables.contains(print)){
+            this.llvmcode.append("\t %" +this.uvars + " = load i32 , i32* %" + print + "\n");
+            this.llvmcode.append("\tcall void @println(i32 %" + this.uvars + ")\n");
+            this.uvars++;
+        }
         this.print = true;
     }
 
     // Read code
-    public void ReadInt(String read) {
+    public void ReadVar(String read) {
         this.read = true;
-        String var = DeclareUvars();
-        this.llvmcode.append("\t" + var + " =call i32 @readInt()\n");
+        this.llvmcode.append("\t%" + this.uvars + " =call i32 @readInt()\n");
+        if(varriables.contains(read)){
+            this.llvmcode.append("\tstore i32 %" + this.uvars  + ",i32* %" + read + "\n");
+        }
+        else{
+            this.llvmcode.append("\t%" + read + " = alloca i32\n");
+            this.llvmcode.append("\tstore i32 %" + this.uvars + ",i32* %" + read + "\n");
+            varriables.add(read);
 
-        StoreValue("%" + read, var);
+
+        }
+        this.uvars++;
     }
 
     // create id for 'for loop'
@@ -184,7 +209,7 @@ public class LlvmCode {
 
     // Label to start ELSE
     public void Ifstlabel(String lbl, int ifid) {
-        this.llvmcode.append("\tbr label %ENDIF" + ifid + "\n");
+        this.llvmcode.append("\tbr label %endif" + ifid + "\n");
         this.llvmcode.append(lbl + ifid + ":\n");
 
     }
@@ -223,22 +248,35 @@ public class LlvmCode {
 
     // Function Read
     private String declareRead() {
-
-        return " declare i32 @getchar() \n ; Defining a function wich read integer  \ndefine i32 @readInt() {  \n  entry:  \n  \t	%res = alloca i32  \n  \t	%digit = alloca i32  \n  \t	%mult = alloca i32  \n  \t	store i32 0, i32* %res  \n  \t	store i32 1, i32* %mult  \n  \t	br label %firstread  \n  firstread:  \n  \t	%a = call i32 @getchar()  \n   \t	%b = icmp eq i32 %a, 45  \n  \t	br i1 %b, label %firstminus, label %firstdigit  \n  firstminus:  \n  \t	store i32 -1, i32* %mult  \n  \t	br label %read  \n  firstdigit:  \n  \t	%c = sub i32 %a, 48  \n   \t	store i32 %c, i32* %digit  \n  \t	%d = icmp ne i32 %a, 10  \n  \t	br i1 %d, label %save, label %exit  \n  read:  \n  \t	%0 = call i32 @getchar()  \n  \t	%1 = sub i32 %0, 48  \n  \t	store i32 %1, i32* %digit  \n  \t	%2 = icmp ne i32 %0, 10  \n  \t	br i1 %2, label %save, label %exit  \n  save:  \n   \t	%3 = load i32,i32* %res  \n  \t	%4 = load i32,i32* %digit  \n  \t	%5 = mul i32 %3, 10  \n  \t	%6 = add i32 %5, %4  \n  \t	store i32 %6, i32* %res  \n  \t	br label %read  \n  getminus:  \n  \t	store i32 -1, i32* %mult  \n  \t	br label %read  \n exit:  \n  \t	%7 = load i32,i32* %res  \n \t	%8 = load i32,i32* %mult  \n \t	%9 = mul i32 %7, %8  \n  \t	ret i32 %9  \n }   \n";
+        String read="@.strR = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n" +
+                "\n" +
+                "; Function Attrs: nounwind uwtable\n" +
+                "define i32 @readInt() #0 {\n" +
+                "  %x = alloca i32, align 4\n" +
+                "  %1 = call i32 (i8*, ...) @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.strR, i32 0, i32 0), i32* %x)\n" +
+                "  %2 = load i32, i32* %x, align 4\n" +
+                "  ret i32 %2\n" +
+                "}\n" +
+                "\n" +
+                "declare i32 @__isoc99_scanf(i8*, ...) #1";
+        return read;
     }
 
     // Function Read
     public String declarePrint() {
-        String str="define void @println(i32 %x) #0 { \n"+
-        "%1 = alloca i32, align 4 \n "+
-        "store i32 %x, i32* %1, align 4 \n "+
-        "%2 = load i32, i32* %1, align 4 \n "+
-        "%3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.strP, i32 0, i32 0), i32 %2) \n "+
-        "ret void \n "+
-        "} \n "+
-        " \n "+
-        "declare i32 @printf(i8*, ...) #1 \n "+
-        " \n ";
+        String str="; Defining a function wich print integer\n" +
+                "\n" +
+                "define void @println(i32 %x) #0 {\n" +
+                "  %1 = alloca i32, align 4\n" +
+                "  store i32 %x, i32* %1, align 4\n" +
+                "  %2 = load i32, i32* %1, align 4\n" +
+                "  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.strP, i32 0, i32 0), i32 %2)\n" +
+                "  ret void\n" +
+                "}\n" +
+                "\n" +
+                "@.strP = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n" +
+                "\n" +
+                "declare i32 @printf(i8*, ...) #1\n";
         return str;
     }
 

@@ -1,14 +1,6 @@
 CO Euclid's algorithm CO
 begin
-  read(a);
-  read(b);
-  while b /= 0 do
-    c := b ;
-    while a >= b do     co computation of modulo
-      a := a-b
-    endwhile ;
-    b := a ;
-    a := c
-  endwhile ;
-  print(a)
+a:=7;
+b:=4;
+while a>2 do print(a);a:=a-2 endwhile
 end

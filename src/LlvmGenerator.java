@@ -101,11 +101,8 @@ public class LlvmGenerator {
 
     private void Read(ParseTree varlist) {
 
-        String var = varlist.getChildren().get(2).getLabel().getValue().toString();
-        if (!this.llvmCode.Isvar(var)) {
-            this.llvmCode.DeclareVars(var);
-        }
-        this.llvmCode.ReadInt(var);
+        String var = varlist.getChildren().get(2).getLabel().getValue();
+        this.llvmCode.ReadVar(var);
 
     }
 
@@ -114,9 +111,10 @@ public class LlvmGenerator {
 
         String var = assignTree.getChildren().get(0).getLabel().getValue().toString();
         // if this var is not alredy declared ,we declare it
-        this.llvmCode.DeclareVars(var);
+
         String exp = ExpArth(assignTree.getChildren().get(2));
-        this.llvmCode.StoreValue("%" + var, exp);
+        this.llvmCode.assign(var,exp);
+
     }
 
 
@@ -145,14 +143,14 @@ public class LlvmGenerator {
         String var = "";
         switch (beta.getChildren().get(0).getLabel().getType()) {
         case VARNAME:
-            String vartoload = beta.getChildren().get(0).getLabel().getValue().toString();
+            String vartoload = beta.getChildren().get(0).getLabel().getValue();
             var = this.llvmCode.LoadVar(vartoload);
             if (var.equals("Not Found")) {
                 LlvmGeneratecodeError("Varriable " + var + " Not initialised !");
             }
             return var;
         case NUMBER:
-            var = beta.getChildren().get(0).getLabel().getValue().toString();
+            var = beta.getChildren().get(0).getLabel().getValue();
 
             return this.llvmCode.Uvars(var);
 
@@ -317,20 +315,20 @@ public class LlvmGenerator {
 
 
     private String Ifst(ParseTree IfstTree) {
-        if (IfstTree.getChildren().get(0).getLabel().getValue().equals("ELSE")) {
-            return "ELSE";
+        if (IfstTree.getChildren().get(0).getLabel().getValue().equals("else")) {
+            return "else";
         }
-        return "ENDIF";
+        return "endif";
 
     }
 
     private void ElseCode(ParseTree ElseCode, int ifid) {
-        if (ElseCode.getChildren().get(0).getLabel().getValue().equals("ELSE")) {
-            this.llvmCode.Ifstlabel("ELSE", ifid);
-            Code(ElseCode.getChildren().get(2));
-            this.llvmCode.Ifstlabel("ENDIF", ifid);
+        if (ElseCode.getChildren().get(0).getLabel().getValue().equals("else")) {
+            this.llvmCode.Ifstlabel("else", ifid);
+            Code(ElseCode.getChildren().get(1));
+            this.llvmCode.Ifstlabel("endif", ifid);
         } else
-            this.llvmCode.Ifstlabel("ENDIF", ifid);
+            this.llvmCode.Ifstlabel("endif", ifid);
 
     }
 
