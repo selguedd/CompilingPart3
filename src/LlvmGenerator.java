@@ -253,20 +253,20 @@ public class LlvmGenerator {
 
     private String Comp(ParseTree comp) {
         switch (comp.getChildren().get(0).getLabel().getValue().toString()) {
-        case "EQUAL":
+        case "=":
             return "eq";
-        case "GREATER_EQUAL":
+        case ">=":
             return "sge";
-        case "GREATER":
+        case ">":
             return "sgt";
 
-        case "SMALLER_EQUAL":
+        case "<=":
             return "sle";
 
-        case "SMALLER":
+        case "<":
             return "slt";
 
-        case "DIFFERENT":
+        case "/=":
             return "ne";
         }
         return null;
