@@ -293,7 +293,7 @@ public class Parser {
         switch (current.getType()){
             case NOT:
                 rules.add(37);
-                return new ParseTree(new Symbol(NotTerminal.Condis), Arrays.asList(new ParseTree[]{new ParseTree(new Symbol(LexicalUnit.EPSILON))}));
+                return new ParseTree(new Symbol(NotTerminal.Condis), Arrays.asList(new ParseTree[]{this.match(LexicalUnit.NOT),this.condis()}));
             case NUMBER:
             case LEFT_PARENTHESIS:
             case MINUS:
