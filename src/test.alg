@@ -1,4 +1,7 @@
+CO Euclid's algorithm CO
 begin
-a:=5;
-while a<9 do a:=a+2;print(a) endwhile
+read(a);
+read(b);
+print(b);
+print(a)
 end
