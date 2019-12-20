@@ -1,4 +1,5 @@
+CO Euclid's algorithm CO
 begin
-a :=6;
-if a=5 then print(a) endif
+a:=7;
+print(a)
 end
