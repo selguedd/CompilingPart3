@@ -1,8 +1,9 @@
 import java.util.*;
 
 /**
- *
- * LLVM code writer
+ * This class is responsible for LLVM code writing.
+ * It contains multiple and different methods to write
+ * LLVM code that is going to be generated at the output of our program.
  *
  */
 

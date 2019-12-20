@@ -1,32 +1,26 @@
 import java.util.*;
 import java.io.*;
 /**
- *
- * parcour the ParseTree and call LlvmCoda.java to write the code
+ * The goal of this class is to go through the Parse Tree given in argument to the constructor,
+ * identify each and every node to generate the corresponding LLVM code by calling methods from the LLVMCode class.
  *
  * @see LlvmCode
  *
  */
 public class LlvmGenerator {
-    /**
-     * ParseTree
-     */
     ParseTree PTree;
-    /** LLVM code generator */
     LlvmCode llvmCode;
 
-    /**
-     *
-     * @param PTree ParseTree
-     */
+
     public LlvmGenerator(ParseTree PTree) {
         this.PTree = PTree;
         this.llvmCode = new LlvmCode();
     }
 
-    /**
-     * Generate the llvm code
-     */
+/**
+ * Method that is called to launch the reading through the parse tree
+ *
+ */
     public void Generate() {
 
         // Childrens of the ParseTree
@@ -40,7 +34,10 @@ public class LlvmGenerator {
 
         } }
 
-
+/**
+ * Method that is called when the symbol "Code" is matched
+ * in the parsetree
+ */
 
     private void Code(ParseTree code) {
         if (code.getChildren().get(0).getLabel().getVariable().toString().equals("InstList")) {
@@ -359,11 +356,6 @@ public class LlvmGenerator {
         this.llvmCode.Afterwhile(whileid);
 
     }
-
-
-
-
-
 
 
 
