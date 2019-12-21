@@ -4,7 +4,7 @@ import java.util.*;
  * This class is responsible for LLVM code writing.
  * It contains multiple and different methods to write
  * LLVM code that is going to be generated at the output of our program.
- *
+ * @author Salma El Gueddari, Naim Sassine
  */
 
 public class LlvmCode {
@@ -101,7 +101,7 @@ public class LlvmCode {
 
     }
 
-    // check if the variable is alredy exist
+    // check if the variable already exists
     public boolean Isvar(String var) {
         if (this.varriables.contains(var)) {
             return true;
@@ -247,7 +247,6 @@ public class LlvmCode {
 
     }
 
-    // Function Read
     private String declareRead() {
         String read="@.strR = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n" +
                 "\n" +
@@ -263,7 +262,6 @@ public class LlvmCode {
         return read;
     }
 
-    // Function Read
     public String declarePrint() {
         String str="; Defining a function wich print integer\n" +
                 "\n" +
@@ -281,7 +279,6 @@ public class LlvmCode {
         return str;
     }
 
-    // llvm code tostring
     public String toString() {
         String code = "";
         this.llvmcode.append("ret i32 0 \n }");

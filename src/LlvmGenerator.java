@@ -5,7 +5,7 @@ import java.io.*;
  * identify each and every node to generate the corresponding LLVM code by calling methods from the LLVMCode class.
  *
  * @see LlvmCode
- *
+ * @author Salma El Gueddari, Naim Sassine
  */
 public class LlvmGenerator {
     ParseTree PTree;
@@ -70,12 +70,9 @@ public class LlvmGenerator {
                     While(inst.getChildren().get(0));
                     break;
                 case For:
-                    //inst = FOR Node
                     For(inst.getChildren().get(0));
                     break;
                 case Print:
-                    //inst.getChildren().get(2) = Explist Node
-                    //ExpList(inst.getChildren().get(2));
                     Print(inst.getChildren().get(0));
                     break;
                 case Read:
@@ -86,7 +83,6 @@ public class LlvmGenerator {
 
 
     private void Print(ParseTree printTree) {
-
 
         String var = printTree.getChildren().get(2).getLabel().getValue();
         if (!this.llvmCode.Isvar(var)) {
@@ -121,12 +117,6 @@ public class LlvmGenerator {
             InstList(inst.getChildren().get(1));
         }
     }
-
-
-
-
-
-
 
 
 
@@ -187,11 +177,9 @@ public class LlvmGenerator {
             String val = "";
             switch (exp.getChildren().get(0).getChildren().get(0).getLabel().getType()) {
             case PLUS:
-                //val = ExpArth(exp.getChildren().get(1));
                 val = ExprTail(exp.getChildren().get(2), ProdTail(exp.getChildren().get(1).getChildren().get(1), ProdAtom(exp.getChildren().get(1).getChildren().get(0))));
                 return this.llvmCode.Experssion(tmp, "add", val);
             case MINUS:
-                //val = ExpArth(exp.getChildren().get(1));
                 val = ExprTail(exp.getChildren().get(2), ProdTail(exp.getChildren().get(1).getChildren().get(1), ProdAtom(exp.getChildren().get(1).getChildren().get(0))));
                 return this.llvmCode.Experssion(tmp, "sub", val);
             }
@@ -205,8 +193,7 @@ public class LlvmGenerator {
 
 
 
- private String andExp(ParseTree condp) {
-        // getLabel().getVariable().toString().equals("InstList")
+    private String andExp(ParseTree condp) {
 
         if (condp.getLabel().toString().equals("CondTail")) {
             if(condp.getChildren().get(1).getChildren().get(0).getLabel().toString().equals("NOT")){
@@ -220,8 +207,6 @@ public class LlvmGenerator {
             return this.llvmCode.Bitw("xor", cnd, "true");
 
         }
-        System.out.println("condPrime");
-        System.out.println(condp.getChildren().get(0).getLabel().toString());
         return CondTail(condp.getChildren().get(1), SimpleCond(condp.getChildren().get(0)));
 
     }
@@ -237,11 +222,8 @@ public class LlvmGenerator {
     }
 
     private String CondTail(ParseTree condpb, String condprimeVar) {
-        //getLabel().getType().toString().equals("EPSILON")
         if (condpb.getChildren().get(0).getLabel().toString().equals("AND")) {
-            System.out.println("and done");
             String andvar = CondTail(condpb.getChildren().get(2), andExp(condpb));
-            System.out.println(andvar);
             return this.llvmCode.Bitw("and", andvar, condprimeVar);
 
         }
@@ -250,8 +232,6 @@ public class LlvmGenerator {
 
 
     private String SimpleCond(ParseTree SimpleCond) {
-        System.out.println("SimpleCond");
-        System.out.println(SimpleCond.getLabel().toString());
         if(SimpleCond!=null){
         String expA = ExpArth(SimpleCond.getChildren().get(0));
         String expB = ExpArth(SimpleCond.getChildren().get(2));
@@ -299,7 +279,6 @@ public class LlvmGenerator {
 
         this.llvmCode.StoreValue("%" + var, i);
         int forid = this.llvmCode.Forid();
-         // faudera modifier paske c est une autre for loop dans notre lannguage
         this.llvmCode.ForLop(var, n, forid);
         Code(forTree.getChildren().get(9));
         this.llvmCode.EndFor(var, forid);
@@ -314,14 +293,13 @@ public class LlvmGenerator {
 
 
     private void If(ParseTree iftree) {
-        // <If> --> IF <Cond> THEN <Code> <IfTail>
         int ifid = this.llvmCode.Iflabel();
         String ifcnd = orExp(iftree.getChildren().get(1).getChildren().get(1), andExp(iftree.getChildren().get(1).getChildren().get(0)));
         String labelcond = Ifst(iftree.getChildren().get(4));
 
         this.llvmCode.If(ifcnd, labelcond, ifid);
         Code(iftree.getChildren().get(3));
-        ElseCode(iftree.getChildren().get(4), ifid);
+        IfTail(iftree.getChildren().get(4), ifid);
 
     }
 
@@ -334,7 +312,7 @@ public class LlvmGenerator {
 
     }
 
-    private void ElseCode(ParseTree ElseCode, int ifid) {
+    private void IfTail(ParseTree ElseCode, int ifid) {
         if (ElseCode.getChildren().get(0).getLabel().getValue().equals("else")) {
             this.llvmCode.Ifstlabel("else", ifid);
             Code(ElseCode.getChildren().get(1));

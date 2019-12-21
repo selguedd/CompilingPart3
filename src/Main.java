@@ -18,37 +18,42 @@ public class Main{
         if (args.length == 0) {
             wrongArguments();
         }
-        String tex = ".tex";
+        // String tex = ".tex";
+        String ll = ".ll";
+        String outputfile = "";
         int argNumber = args.length-1;
         FileReader Source = null;
         Parser parse = null;
         ParseTree parseTree=null;
 
+
         try {
-            Source = new FileReader(args[argNumber]);
+             Source = new FileReader(args[0]);
         } catch (IOException ioe) {
-            System.out.println("File not found: check your path");
-        }
+             System.out.println("File not found: check your path");
+                        }
         parse = new Parser(Source);
         parseTree = parse.start();
-        parse.printRules();
-		 for(int i = 0; i < args.length; ++i){
-			if(args[i].equals("-v")){
-				parse.printVerboseRules();
-			}
+        LlvmGenerator llvm = new LlvmGenerator(parseTree);
+        llvm.Generate();
+        System.out.println(llvm.toString());
+        // parse.printRules();  // Code for printing rules
+		 for(int i = 1; i < args.length; ++i){
 
-
-            if (args[i].equals("-wt") && args[i+1].toLowerCase().contains(tex) ){
-
-                String content = parseTree.toLaTeX();
+            if (args[i].equals("-o") && args[i+1].toLowerCase().contains(ll)){
+                FileWriter fwTree = null;
+                BufferedWriter bwTree = null;
+                outputfile = args[i+1];
                 try {
-                    Files.write(Paths.get(args[i+1]), content.getBytes());
-                    LlvmGenerator llvm = new LlvmGenerator(parseTree);
-                    llvm.Generate();
-                    System.out.println(llvm.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    fwTree = new FileWriter(outputfile);
+                    bwTree = new BufferedWriter(fwTree);
+                    bwTree.write(llvm.toString());
+                    bwTree.close();
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                                        }
+
+
             }
 
 
@@ -62,10 +67,7 @@ public class Main{
 
 
 	public static void wrongArguments(){
-		System.out.println("Usage:  java -jar Part2.jar [OPTIONS] [FILES]\n\tOPTIONS:\n\t -v prints out a more verbose description of the rules" +
-				"\n\t -wt writes down the parsetree to the file .tex given in arguments " +
-				"\n\tA .tex file to write the parsetree on it\n" +
-				" \n\tFILES:\n\tA .txt file containing a code");
+		System.out.println("Usage:  -jar part3.jar inputFile.alg -o outputFile.ll \n");
 		System.exit(0);
 	}
 

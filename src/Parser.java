@@ -32,7 +32,7 @@ public class Parser {
 
     private ParseTree match(LexicalUnit l) throws IOException, ParserException {
         if(current.getType().equals(LexicalUnit.END_OF_STREAM)){
-            System.out.println("Parser and execution  run successfully");
+            // System.out.println("Parser and execution  run successfully");
             current = scanner.nextToken();
             return null;
         }
